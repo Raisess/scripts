@@ -65,6 +65,11 @@ if __name__ == "__main__":
     raise Exception(f"`{POPSTARTER_ELF}` not found in path: {pops_path}")
 
 
+  vmc_backup_path = f"{pops_path}/BACKUP"
+  if not os.path.isdir(vmc_backup_path):
+    os.mkdir(vmc_backup_path)
+
+
   with open(conf_apps_path, "r") as conf_apps_file:
     conf_apps_file_content = conf_apps_file.read()
     games_in_conf_apps = [line.split("=")[0] for line in conf_apps_file_content.split("\n")]
@@ -75,10 +80,24 @@ if __name__ == "__main__":
       game = Game(path=entry)
       print(game.id())
       print(game.name())
+
+      # Create cheats file
+      with open(f"{game.fullname()}/CHEATS.TXT", "w") as cheats_file:
+        cheats_file.write("$SAFEMODE\n$480p\n$HDTVFIX")
+
+
+      # Create VMC backup
+      game_vmc_backup_path = f"{vmc_backup_path}/{game.fullname()}"
+      if not os.path.isdir(game_vmc_backup_path):
+        shutil.copytree(game.fullname(), game_vmc_backup_path)
+
+
+      # Create .ELF file
       if not game.has_elf(pops_path):
         shutil.copyfile(popstarter_elf_path, f"{pops_path}/{game.elfname()}")
 
 
+      # Download ARTs
       if not game.has_art(art_path):
         import urllib.request
         file_types = ["COV", "BG_00", "LGO"]
@@ -92,6 +111,7 @@ if __name__ == "__main__":
             print(f"Failed to download {file_type} for: {game.name()}")
 
 
+      # Add game to `conf_apps.cfg`
       if not game.name() in games_in_conf_apps:
         game_line = f"{game.name()}=mass0:/POPS/{game.elfname()}"
         with open(conf_apps_path, "a") as conf_apps_file:
