@@ -8,7 +8,7 @@ import sys
 class Title:
   @staticmethod
   def Regex(filename: str) -> str:
-    match = re.search("([S|T]|Season)?\s*\d+x?\s*(E|Episode)?\s*\d+", item)
+    match = re.search("([S|T]|Season)?\\s*\\d+x?\\s*(E|Episode)?\\s*\\d+", item)
     if not match:
       raise Exception("No match!")
 
